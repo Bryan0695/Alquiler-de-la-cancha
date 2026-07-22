@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Numeric, Time, Boolean
 from app.database import Base
 
 class Cancha(Base):
-    __tablename__ = "Cancha"
+    __tablename__ = "cancha"
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100), nullable=False)
     tipo = Column(String(20))
