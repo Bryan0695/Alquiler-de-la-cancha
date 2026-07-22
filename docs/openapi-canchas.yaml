@@ -1,0 +1,353 @@
+openapi: 3.0.3
+info:
+  title: API Sistema de Reservas de Canchas
+  description: |
+    Contrato de referencia para el equipo (backend en FastAPI, frontend en Angular). Cubre el caso de uso UC7 - Gestionar canchas (crear, listar, editar, eliminar), que segun el diagrama de casos de uso incluye <<include>> Iniciar sesion (UC2) y <<include>> Validar datos.
+    Basado en:
+      - diagrama.puml (clases y atributos)
+      - 007-UC7-Gestionar_canchas.puml (operaciones del caso de uso)
+      - UC7_Gestionar_Canchas.puml (flujo y codigos HTTP)
+  version: 1.0.0
+servers:
+- url: http://localhost:8000
+  description: Entorno local de desarrollo
+- url: https://canchas-api.onrender.com
+  description: Entorno desplegado
+tags:
+- name: Autenticacion
+  description: Login previo requerido para gestionar canchas (UC2)
+- name: Canchas
+  description: Gestion de canchas por el administrador (UC7)
+paths:
+  /login:
+    post:
+      tags:
+      - Autenticacion
+      summary: Iniciar sesion
+      description: |
+        Valida credenciales y devuelve un token JWT. El administrador debe iniciar sesion antes de gestionar canchas. El token se envia luego en el header Authorization de cada peticion protegida.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Credenciales invalidas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /canchas:
+    get:
+      tags:
+      - Canchas
+      summary: Listar canchas del administrador
+      description: |
+        Devuelve las canchas registradas por el administrador autenticado. Corresponde al flujo de listado del diagrama de secuencia (Router valida token y rol, luego Service y Repository consultan la BD).
+      responses:
+        "200":
+          description: Listado de canchas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CanchaResponse"
+        "401":
+          description: Token ausente o invalido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: El usuario no tiene rol de administrador
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Canchas
+      summary: Crear cancha
+      description: |
+        Registra una nueva cancha. El servicio valida los datos (G4 Validar datos) y genera automaticamente las franjas horarias entre hora_apertura y hora_cierre.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CanchaCreateRequest"
+        required: true
+      responses:
+        "201":
+          description: Cancha registrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CanchaResponse"
+        "400":
+          description: Datos invalidos (falla la validacion)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Token ausente o invalido
+        "403":
+          description: El usuario no tiene rol de administrador
+      security:
+      - bearerAuth: []
+  /canchas/{cancha_id}:
+    get:
+      tags:
+      - Canchas
+      summary: Obtener una cancha por id
+      parameters:
+      - name: cancha_id
+        in: path
+        description: Identificador unico de la cancha
+        required: true
+        schema:
+          type: integer
+          example: 1
+      responses:
+        "200":
+          description: Cancha encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CanchaResponse"
+        "404":
+          description: La cancha no existe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - Canchas
+      summary: Editar cancha
+      description: |
+        Actualiza los datos de una cancha existente (G2 Editar cancha). Vuelve a aplicar la validacion de datos.
+      parameters:
+      - name: cancha_id
+        in: path
+        description: Identificador unico de la cancha
+        required: true
+        schema:
+          type: integer
+          example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CanchaUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: Cancha actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CanchaResponse"
+        "400":
+          description: Datos invalidos
+        "404":
+          description: La cancha no existe
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Canchas
+      summary: Eliminar cancha (baja logica)
+      description: |
+        Elimina logicamente la cancha (activa = false) para preservar el historico de reservas. Si la cancha tiene reservas activas, la operacion se rechaza con 409.
+      parameters:
+      - name: cancha_id
+        in: path
+        description: Identificador unico de la cancha
+        required: true
+        schema:
+          type: integer
+          example: 1
+      responses:
+        "200":
+          description: Cancha eliminada (desactivada)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MensajeResponse"
+        "404":
+          description: La cancha no existe
+        "409":
+          description: La cancha tiene reservas activas y no se puede eliminar
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    LoginRequest:
+      required:
+      - correo
+      - password
+      type: object
+      properties:
+        correo:
+          type: string
+          format: email
+          example: admin@canchas.com
+        password:
+          type: string
+          format: password
+          example: "123456"
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        usuario:
+          $ref: "#/components/schemas/UsuarioResponse"
+    UsuarioResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Ana Perez
+        correo:
+          type: string
+          format: email
+          example: admin@canchas.com
+        rol:
+          type: string
+          example: ADMINISTRADOR
+          enum:
+          - JUGADOR
+          - ADMINISTRADOR
+      description: Datos publicos del usuario (nunca incluye password_hash)
+    CanchaCreateRequest:
+      required:
+      - hora_apertura
+      - hora_cierre
+      - nombre
+      - precio_hora
+      - tipo
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: Cancha El Estadio
+        tipo:
+          type: string
+          description: Tipo de cancha
+          example: futbol5
+        precio_hora:
+          type: number
+          format: float
+          example: 25
+        hora_apertura:
+          type: string
+          format: time
+          example: 08:00
+        hora_cierre:
+          type: string
+          format: time
+          example: 22:00
+    CanchaUpdateRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: Cancha El Estadio
+        tipo:
+          type: string
+          example: futbol7
+        precio_hora:
+          type: number
+          format: float
+          example: 30
+        hora_apertura:
+          type: string
+          format: time
+          example: 09:00
+        hora_cierre:
+          type: string
+          format: time
+          example: 23:00
+      description: Campos editables de una cancha. Todos opcionales.
+    CanchaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Cancha El Estadio
+        tipo:
+          type: string
+          example: futbol5
+        precio_hora:
+          type: number
+          format: float
+          example: 25
+        hora_apertura:
+          type: string
+          format: time
+          example: 08:00
+        hora_cierre:
+          type: string
+          format: time
+          example: 22:00
+        promedio_calificacion:
+          type: number
+          format: float
+          example: 4.5
+        activa:
+          type: boolean
+          example: true
+      description: Representacion de una cancha devuelta por la API
+    MensajeResponse:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Cancha eliminada correctamente
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: Descripcion del error
+  parameters:
+    CanchaId:
+      name: cancha_id
+      in: path
+      description: Identificador unico de la cancha
+      required: true
+      schema:
+        type: integer
+        example: 1
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: Token JWT obtenido en /login. Se envia como Authorization Bearer.
+      scheme: bearer
+      bearerFormat: JWT

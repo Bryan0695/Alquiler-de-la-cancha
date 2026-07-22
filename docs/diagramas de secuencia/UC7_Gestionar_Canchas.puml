@@ -1,0 +1,115 @@
+@startuml Secuencia_UC7_Gestionar_Canchas
+title Diagrama de secuencia - UC7 Gestionar canchas (crear y eliminar)
+
+actor Administrador
+boundary "VistaGestionCanchas" as Vista
+control "CanchaController" as Controller
+control "CanchaService" as Service
+entity "Cancha" as Cancha
+entity "Horario" as Horario
+database "BaseDatos" as BD
+
+autonumber
+
+Administrador -> Vista : acceder a gestion de canchas
+activate Vista
+
+Vista -> Controller : listar_canchas(admin_id)
+activate Controller
+Controller -> Controller : validar_sesion_y_rol()
+
+alt rol no autorizado
+  Controller --> Vista : error 403 - acceso denegado
+  Vista --> Administrador : mostrar mensaje de permiso insuficiente
+end
+
+Controller -> BD : consultar_canchas(admin_id)
+activate BD
+BD --> Controller : lista de canchas
+deactivate BD
+Controller --> Vista : listado
+deactivate Controller
+Vista --> Administrador : mostrar canchas registradas
+
+group Crear cancha
+  Administrador -> Vista : ingresar datos de nueva cancha
+  Vista -> Controller : crear_cancha(datos)
+  activate Controller
+  Controller -> Service : registrar(admin_id, datos)
+  activate Service
+
+  Service -> Service : validar_datos(datos)
+
+  alt datos invalidos
+    Service --> Controller : ValidacionException
+    Controller --> Vista : error 400 - datos invalidos
+    Vista --> Administrador : resaltar campos con error
+  else datos validos
+    Service -> Cancha : crear(nombre, tipo, precio_hora)
+    activate Cancha
+    Cancha --> Service : cancha
+    deactivate Cancha
+
+    Service -> Horario : generar_franjas(apertura, cierre)
+    activate Horario
+    Horario --> Service : lista de horarios
+    deactivate Horario
+
+    Service -> BD : guardar(cancha, horarios)
+    activate BD
+    BD --> Service : commit exitoso
+    deactivate BD
+
+    Service --> Controller : cancha creada
+    Controller --> Vista : 201 - cancha registrada
+    Vista --> Administrador : mostrar confirmacion
+  end
+  deactivate Service
+  deactivate Controller
+end
+
+group Eliminar cancha
+  Administrador -> Vista : solicitar eliminacion de cancha
+  Vista -> Controller : eliminar_cancha(cancha_id)
+  activate Controller
+  Controller -> Service : eliminar(cancha_id)
+  activate Service
+
+  Service -> BD : contar_reservas_activas(cancha_id)
+  activate BD
+  BD --> Service : total
+  deactivate BD
+
+  alt existen reservas activas
+    Service --> Controller : IntegridadException
+    Controller --> Vista : error 409 - cancha con reservas activas
+    Vista --> Administrador : advertir que no se puede eliminar
+  else sin reservas activas
+    Service -> Cancha : desactivar()
+    activate Cancha
+    Cancha --> Service : activa = false
+    deactivate Cancha
+
+    Service -> BD : actualizar(cancha)
+    activate BD
+    BD --> Service : commit exitoso
+    deactivate BD
+
+    Service --> Controller : eliminacion exitosa
+    Controller --> Vista : 200 - cancha eliminada
+    Vista --> Administrador : actualizar listado
+  end
+  deactivate Service
+  deactivate Controller
+end
+
+deactivate Vista
+
+note right of Cancha
+  La eliminacion es logica
+  (activa = false) para
+  preservar el historico
+  de reservas.
+end note
+
+@enduml

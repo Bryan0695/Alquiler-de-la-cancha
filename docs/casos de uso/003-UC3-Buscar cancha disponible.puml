@@ -1,0 +1,20 @@
+' ============================================
+' UC3 - Buscar cancha disponible
+' ============================================
+@startuml UC3_BuscarCancha
+left to right direction
+title UC3 - Buscar cancha disponible
+
+actor Usuario
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Buscar cancha disponible" as UC3
+  usecase "Aplicar filtros" as F1
+  usecase "Ver detalle de cancha" as F2
+}
+
+Usuario --> UC3
+UC3 .> F1 : <<include>>
+F2 .> UC3 : <<extend>>
+
+@enduml

@@ -1,0 +1,145 @@
+@startuml Diagrama_de_Clases
+title Diagrama de clases - Sistema de reservas de canchas
+
+skinparam classAttributeIconSize 0
+
+class Rol {
+  - id : int
+  - nombre : str
+  - descripcion : str
+  --
+  + tiene_permiso(accion) : bool
+  + es_administrador() : bool
+}
+
+class Usuario {
+  - id : int
+  - nombre : str
+  - correo : str
+  - password_hash : str
+  - telefono : str
+  - fecha_registro : datetime
+  - activo : bool
+  --
+  + autenticar(correo, password) : bool
+  + encriptar_password(password) : str
+  + es_administrador() : bool
+  + actualizar_perfil(datos) : void
+}
+
+class Cancha {
+  - id : int
+  - nombre : str
+  - tipo : str
+  - precio_hora : float
+  - hora_apertura : time
+  - hora_cierre : time
+  - promedio_calificacion : float
+  - activa : bool
+  --
+  + esta_disponible(fecha, hora) : bool
+  + calcular_precio(horas) : float
+  + recalcular_promedio() : void
+  + desactivar() : void
+}
+
+class Horario {
+  - id : int
+  - fecha : date
+  - hora_inicio : time
+  - hora_fin : time
+  - estado : EstadoHorario
+  --
+  + generar_franjas(apertura, cierre) : list
+  + bloquear() : void
+  + liberar() : void
+  + esta_libre() : bool
+}
+
+class Reserva {
+  - id : int
+  - fecha_creacion : datetime
+  - monto_total : float
+  - estado : EstadoReserva
+  --
+  + calcular_total() : float
+  + confirmar() : bool
+  + esta_pagada() : bool
+}
+
+class Pago {
+  - id : int
+  - monto : float
+  - fecha_pago : datetime
+  - estado : EstadoPago
+  - metodo : str
+  --
+  + procesar(monto) : bool
+  - registrar_transaccion() : void
+  + generar_comprobante() : str
+}
+
+class Calificacion {
+  - id : int
+  - puntaje : int
+  - comentario : str
+  - fecha : datetime
+  --
+  + validar_puntaje() : bool
+  + editar(puntaje, comentario) : void
+}
+
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  COMPLETADA
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  RECHAZADO
+}
+
+enum EstadoHorario {
+  LIBRE
+  OCUPADO
+}
+
+Rol "1" -- "0..*" Usuario : clasifica >
+Usuario "1" -- "0..*" Cancha : administra >
+Cancha "1" *-- "1..*" Horario : contiene >
+Usuario "1" -- "0..*" Reserva : realiza >
+Cancha "1" -- "0..*" Reserva : es reservada en >
+Reserva "1" -- "1" Horario : ocupa >
+Reserva "1" *-- "1" Pago : genera >
+Usuario "1" -- "0..*" Calificacion : emite >
+Cancha "1" -- "0..*" Calificacion : recibe >
+Reserva "1" -- "0..1" Calificacion : origina >
+
+Reserva ..> EstadoReserva
+Pago ..> EstadoPago
+Horario ..> EstadoHorario
+
+note top of Rol
+  Roles definidos:
+  JUGADOR y ADMINISTRADOR.
+  El rol determina los permisos
+  y la vista asignada al iniciar
+  sesion (UC2).
+end note
+
+note bottom of Pago
+  Pago simulado: no hay
+  integracion con pasarela
+  externa ni almacenamiento
+  de datos de tarjeta.
+end note
+
+note right of Usuario
+  La relacion "administra" solo
+  aplica a usuarios con rol
+  ADMINISTRADOR.
+end note
+
+@enduml

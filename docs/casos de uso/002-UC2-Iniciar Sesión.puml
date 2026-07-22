@@ -1,0 +1,22 @@
+' ============================================
+' UC2 - Iniciar sesión
+' ============================================
+@startuml UC2_IniciarSesion
+left to right direction
+title UC2 - Iniciar sesión
+
+actor Usuario
+actor Administrador
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Iniciar sesión" as UC2
+  usecase "Validar credenciales" as V1
+  usecase "Identificar rol" as V2
+}
+
+Usuario --> UC2
+Administrador --> UC2
+UC2 .> V1 : <<include>>
+UC2 .> V2 : <<include>>
+
+@enduml

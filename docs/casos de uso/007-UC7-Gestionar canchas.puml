@@ -1,0 +1,26 @@
+' ============================================
+' UC7 - Gestionar canchas
+' ============================================
+@startuml UC7_GestionarCanchas
+left to right direction
+title UC7 - Gestionar canchas
+
+actor Administrador
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Gestionar canchas" as UC7
+  usecase "Iniciar sesión" as UC2
+  usecase "Crear cancha" as G1
+  usecase "Editar cancha" as G2
+  usecase "Eliminar cancha" as G3
+  usecase "Validar datos" as G4
+}
+
+Administrador --> UC7
+UC7 .> UC2 : <<include>>
+G1 .> UC7 : <<extend>>
+G2 .> UC7 : <<extend>>
+G3 .> UC7 : <<extend>>
+UC7 .> G4 : <<include>>
+
+@enduml

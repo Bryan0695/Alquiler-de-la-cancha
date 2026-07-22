@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+
+actor Usuario
+actor Administrador
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Registrarse" as UC1
+  usecase "Iniciar sesión" as UC2
+  usecase "Buscar cancha disponible" as UC3
+  usecase "Reservar cancha" as UC4
+  usecase "Pagar reserva (simulado)" as UC5
+  usecase "Calificar cancha" as UC6
+  usecase "Gestionar canchas" as UC7
+  usecase "Consultar reservas" as UC8
+}
+
+Usuario --> UC1
+Usuario --> UC2
+Usuario --> UC3
+Usuario --> UC4
+Usuario --> UC6
+
+Administrador --> UC2
+Administrador --> UC7
+Administrador --> UC8
+
+UC4 .> UC2 : <<include>>
+UC4 .> UC5 : <<include>>
+UC6 .> UC4 : <<extend>>
+
+@enduml

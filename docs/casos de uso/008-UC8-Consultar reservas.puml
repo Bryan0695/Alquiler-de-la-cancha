@@ -1,0 +1,20 @@
+' ============================================
+' UC8 - Consultar reservas
+' ============================================
+@startuml UC8_ConsultarReservas
+left to right direction
+title UC8 - Consultar reservas
+
+actor Administrador
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Consultar reservas" as UC8
+  usecase "Iniciar sesión" as UC2
+  usecase "Filtrar reservas" as R1
+}
+
+Administrador --> UC8
+UC8 .> UC2 : <<include>>
+UC8 .> R1 : <<include>>
+
+@enduml

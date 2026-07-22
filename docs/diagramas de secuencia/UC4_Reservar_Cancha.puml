@@ -1,0 +1,94 @@
+@startuml Secuencia_UC4_Reservar_Cancha
+title Diagrama de secuencia - UC4 Reservar cancha
+
+actor Usuario
+boundary "VistaReserva" as Vista
+control "ReservaController" as Controller
+control "ReservaService" as Service
+entity "Cancha" as Cancha
+entity "Horario" as Horario
+entity "Reserva" as Reserva
+entity "Pago" as Pago
+database "BaseDatos" as BD
+
+autonumber
+
+Usuario -> Vista : seleccionar cancha, fecha y hora
+activate Vista
+
+Vista -> Controller : crear_reserva(cancha_id, fecha, hora)
+activate Controller
+
+Controller -> Controller : validar_sesion_activa()
+
+alt sesion no valida
+  Controller --> Vista : error 401 - sesion requerida
+  Vista --> Usuario : redirigir a inicio de sesion
+end
+
+Controller -> Service : procesar_reserva(usuario_id, cancha_id, horario)
+activate Service
+
+Service -> BD : obtener_cancha(cancha_id)
+activate BD
+BD --> Service : cancha
+deactivate BD
+
+Service -> Cancha : esta_disponible(fecha, hora)
+activate Cancha
+Cancha -> Horario : esta_libre()
+activate Horario
+Horario --> Cancha : estado
+deactivate Horario
+Cancha --> Service : disponible : bool
+deactivate Cancha
+
+alt horario ya ocupado
+  Service --> Controller : ConflictoHorarioException
+  Controller --> Vista : error 409 - horario no disponible
+  Vista --> Usuario : mostrar mensaje y sugerir otro horario
+else horario disponible
+
+  Service -> Reserva : crear(usuario_id, cancha_id, horario_id)
+  activate Reserva
+  Reserva -> Reserva : calcular_total()
+  Reserva --> Service : reserva (estado PENDIENTE)
+  deactivate Reserva
+
+  Service -> Pago : procesar(monto)
+  activate Pago
+  Pago -> Pago : registrar_transaccion_simulada()
+  Pago --> Service : pago (estado PAGADO)
+  deactivate Pago
+
+  Service -> Horario : bloquear()
+  activate Horario
+  Horario --> Service : estado OCUPADO
+  deactivate Horario
+
+  Service -> Reserva : confirmar()
+  activate Reserva
+  Reserva --> Service : reserva (estado CONFIRMADA)
+  deactivate Reserva
+
+  Service -> BD : guardar(reserva, pago, horario)
+  activate BD
+  BD --> Service : commit exitoso
+  deactivate BD
+
+  Service --> Controller : reserva confirmada
+  Controller --> Vista : 201 - datos de la reserva
+  Vista --> Usuario : mostrar confirmacion
+end
+
+deactivate Service
+deactivate Controller
+deactivate Vista
+
+note right of Pago
+  Pago simulado: se registra
+  la transaccion internamente
+  sin pasarela externa.
+end note
+
+@enduml

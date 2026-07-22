@@ -1,0 +1,20 @@
+' ============================================
+' UC1 - Registrarse
+' ============================================
+@startuml UC1_Registrarse
+left to right direction
+title UC1 - Registrarse
+
+actor Usuario
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Registrarse" as UC1
+  usecase "Validar correo único" as V1
+  usecase "Encriptar contraseña" as V2
+}
+
+Usuario --> UC1
+UC1 .> V1 : <<include>>
+UC1 .> V2 : <<include>>
+
+@enduml

@@ -1,0 +1,26 @@
+' ============================================
+' UC5 - Pagar reserva (simulado)
+' ============================================
+@startuml UC5_PagarReserva
+left to right direction
+title UC5 - Pagar reserva (simulado)
+
+actor Usuario
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Pagar reserva (simulado)" as UC5
+  usecase "Registrar transacción" as P1
+  usecase "Asociar pago a reserva" as P2
+}
+
+Usuario --> UC5
+UC5 .> P1 : <<include>>
+UC5 .> P2 : <<include>>
+
+note right of UC5
+  Sin pasarela externa.
+  El pago se registra
+  internamente.
+end note
+
+@enduml

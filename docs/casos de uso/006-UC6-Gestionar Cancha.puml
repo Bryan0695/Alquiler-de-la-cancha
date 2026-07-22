@@ -1,0 +1,22 @@
+' ============================================
+' UC6 - Calificar cancha
+' ============================================
+@startuml UC6_CalificarCancha
+left to right direction
+title UC6 - Calificar cancha
+
+actor Usuario
+
+rectangle "Sistema de reservas de canchas" {
+  usecase "Calificar cancha" as UC6
+  usecase "Reservar cancha" as UC4
+  usecase "Recalcular promedio" as C1
+  usecase "Editar calificación" as C2
+}
+
+Usuario --> UC6
+UC6 .> UC4 : <<extend>>
+UC6 .> C1 : <<include>>
+C2 .> UC6 : <<extend>>
+
+@enduml
