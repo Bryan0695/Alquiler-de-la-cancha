@@ -1,0 +1,14 @@
+# VS Code
+*.code-workspace
+.vscode/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Entorno y credenciales
+.env
+
+# Base de datos local
+*.db
