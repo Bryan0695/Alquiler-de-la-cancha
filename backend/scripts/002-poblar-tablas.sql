@@ -31,6 +31,9 @@ INSERT INTO horario (cancha_id, fecha, hora_inicio, hora_fin, estado) VALUES
     (1, '2026-01-25', '09:00', '10:00', 'LIBRE'),
     (1, '2026-01-25', '10:00', '11:00', 'OCUPADO');
 
+INSERT INTO reserva (usuario_id, cancha_id, monto_total, estado)
+VALUES (1, 1, 25.00, 'CONFIRMADA');
+
 
 -- ============================================
 -- VERIFICACION

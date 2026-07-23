@@ -30,4 +30,42 @@
 }
 
 **********ELIMINACIÓN (borrado lógico)
+token-admin
+	- no puede borrar cancha 1 por que tiene una reserva
+	- puede borra cancha 2 y 3 (no tienen reservas asociadas)
+	- no puede borrar cancha 4, 5 xq no le pertenecen
+token-admin2
+	- no puede borrar cancha 1,2,3 xq no le pertenecen
 
+--- Caso 1 — eliminar una cancha sin reservas (debe dar 200)
+
+token: token-admin
+GET /canchas
+DELETE /canchas/3
+GET /canchas active=true por defcto
+
+BD
+
+SELECT *
+FROM cancha
+WHERE administrador_id = 1;
+
+
+--- Caso 2 — cancha que no existe (debe dar 404)
+
+token: token-admin2
+GET /canchas
+DELETE /canchas/12 -> 404 NOT Fount xq no existe
+
+
+--- Caso 3 — cancha ajena (debe dar 404)
+token: token-admin2
+GET /canchas
+DELETE /canchas/1 -> 404 NOT Fount xq no le pertenece
+
+--- Caso 4 — cancha con reservas activas (debe dar 409)
+
+
+Caso 5 — sin permiso (debe dar 403)
+token: token-jugador
+DELETE /canchas/1 -> 403 -> no tiene permisos

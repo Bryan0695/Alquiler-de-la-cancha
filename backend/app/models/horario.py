@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 from app.models.enums import EstadoHorario
 
-DIAS_A_GENERAR = 7 # para generar las franjas horarias disponibles x los pròximos 7 días
+DIAS_A_GENERAR = 1 # para generar las franjas horarias disponibles x los pròximos 1 días
 
 
 class Horario(Base):

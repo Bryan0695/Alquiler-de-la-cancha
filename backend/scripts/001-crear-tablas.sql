@@ -9,13 +9,13 @@
 -- ============================================
 -- LIMPIEZA (opcional)
 -- ============================================
--- DROP TABLE IF EXISTS calificacion CASCADE;
--- DROP TABLE IF EXISTS pago CASCADE;
 -- DROP TABLE IF EXISTS reserva CASCADE;
 -- DROP TABLE IF EXISTS horario CASCADE;
 -- DROP TABLE IF EXISTS cancha CASCADE;
 -- DROP TABLE IF EXISTS usuario CASCADE;
 -- DROP TABLE IF EXISTS rol CASCADE;
+-- DROP TABLE IF EXISTS calificacion CASCADE;
+-- DROP TABLE IF EXISTS pago CASCADE;
 
 
 -- ============================================

@@ -9,7 +9,7 @@ from app.schemas.cancha_schema import (
     CanchaListResponse,
     CanchaDetalleResponse,
 )
-from app.exceptions import ValidacionException
+from app.exceptions import ValidacionException, IntegridadException
 
 router = APIRouter(prefix="/canchas", tags=["Canchas"])
 
