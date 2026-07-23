@@ -1,0 +1,30 @@
+
+**********CREACIÓN
+201
+{
+  "nombre": "Cancha-Nueva",
+  "tipo": "futbol93",
+  "precio_hora": 28.50,
+  "hora_apertura": "09:00",
+  "hora_cierre": "22:00"
+}
+
+
+400
+{
+  "nombre": "Mala",
+  "tipo": "futbol93",
+  "precio_hora": 28.50,
+  "hora_apertura": "22:00",
+  "hora_cierre": "09:00"
+}
+
+
+403 - cambiar beer por: token-jugador
+{
+  "nombre": "Cancha-Nueva",
+  "tipo": "futbol93",
+  "precio_hora": 28.50,
+  "hora_apertura": "09:00",
+  "hora_cierre": "22:00"
+}

@@ -1,0 +1,42 @@
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+# auto_error=False para poder devolver 401 (por defecto daria 403)
+security = HTTPBearer(auto_error=False)
+
+
+def obtener_usuario_actual(
+    credenciales: HTTPAuthorizationCredentials = Depends(security)
+):
+    """
+    Lee el token del header Authorization: Bearer <token>.
+    SIMULADO: cuando exista el login, aqui se verifica
+    la firma del JWT real.
+    """
+    if credenciales is None:
+        raise HTTPException(status_code=401, detail="Token ausente o invalido")
+
+    token = credenciales.credentials   # ya viene sin el "Bearer "
+
+    # TODO: reemplazar por jwt.decode() cuando exista el login
+    tokens_falsos = {
+        "token-admin":   {"id": 1, "rol": "ADMINISTRADOR"},
+        "token-admin2":  {"id": 3, "rol": "ADMINISTRADOR"},
+        "token-jugador": {"id": 2, "rol": "JUGADOR"},
+    }
+
+    usuario = tokens_falsos.get(token)
+    if usuario is None:
+        raise HTTPException(status_code=401, detail="Token ausente o invalido")
+
+    return usuario
+
+
+def validar_token_y_rol(usuario=Depends(obtener_usuario_actual)):
+    """
+    validar_token_y_rol() del diagrama de secuencia UC7.
+    Solo el rol ADMINISTRADOR puede gestionar canchas.
+    """
+    if usuario["rol"] != "ADMINISTRADOR":
+        raise HTTPException(status_code=403, detail="El usuario no tiene rol de administrador")
+    return usuario

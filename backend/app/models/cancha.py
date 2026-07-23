@@ -40,6 +40,25 @@ class Cancha(Base):
 
     # --- Metodos de dominio (del diagrama) ---
 
+    @classmethod
+    def crear(cls, nombre, tipo, precio_hora,
+              hora_apertura, hora_cierre, administrador_id):
+        """
+        crear() - paso 21 del diagrama.
+        Construye una cancha nueva con sus valores por defecto.
+        cls(...) es lo mismo que Cancha(...)
+        """
+        return cls(
+            nombre=nombre,
+            tipo=tipo,
+            precio_hora=precio_hora,
+            hora_apertura=hora_apertura,
+            hora_cierre=hora_cierre,
+            administrador_id=administrador_id,
+            promedio_calificacion=0,
+            activa=True,
+        )
+
     """
      solo se dejan definidos métodos de otros Casos de Uso ---
     def esta_disponible(self, fecha, hora) -> bool:
