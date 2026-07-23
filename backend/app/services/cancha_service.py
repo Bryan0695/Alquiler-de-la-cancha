@@ -1,7 +1,7 @@
 from app.repositories.cancha_repo import CanchaRepository
 from app.models.cancha import Cancha
 from app.models.horario import Horario
-from app.exceptions import ValidacionException
+from app.exceptions import ValidacionException, IntegridadException
 
 class CanchaService:
 
@@ -57,3 +57,28 @@ class CanchaService:
             raise ValidacionException(
                 "El precio por hora debe ser mayor a cero"
             )
+    
+    def eliminar(self, cancha_id: int, admin_id: int):
+        """
+        eliminar(cancha_id) - paso 34 del diagrama.
+        Eliminacion logica, previa validacion de reservas activas.
+        """
+        cancha = self.repo.buscar_por_id(cancha_id)
+
+        if cancha is None:
+            raise ValidacionException("La cancha no existe")
+
+        # Un admin solo puede eliminar SUS canchas
+        if cancha.administrador_id != admin_id:
+            raise ValidacionException("La cancha no le pertenece")
+
+        total = self.repo.contar_reservas_activas(cancha_id)   # paso 35
+
+        if total > 0:                                          # paso 39
+            raise IntegridadException(
+                f"La cancha tiene {total} reserva(s) activa(s) "
+                "y no se puede eliminar"
+            )
+
+        cancha.desactivar()                                    # paso 42
+        return self.repo.actualizar(cancha)                    # paso 44

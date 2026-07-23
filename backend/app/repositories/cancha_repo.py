@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.cancha import Cancha
+from app.models.reserva import Reserva
+from app.models.enums import EstadoReserva
 
 class CanchaRepository:
 
@@ -29,4 +31,40 @@ class CanchaRepository:
         self.db.add(cancha)
         self.db.commit()             # 
         self.db.refresh(cancha)      # 
+        return cancha
+    
+    def buscar_por_id(self, cancha_id: int):
+        """
+        Recupera una cancha por su id. Devuelve None si no existe.
+        Necesario para poder llamar desactivar() sobre la entidad.
+        """
+        return (
+            self.db.query(Cancha)
+            .filter(Cancha.id == cancha_id)
+            .first()
+        )
+
+    def contar_reservas_activas(self, cancha_id: int) -> int:
+        """
+        contar_reservas_activas() - pasos 35 a 38 del diagrama.
+        SELECT COUNT de reservas PENDIENTE o CONFIRMADA.
+        Las COMPLETADA no cuentan: ya ocurrieron.
+        """
+        return (
+            self.db.query(Reserva)
+            .filter(Reserva.cancha_id == cancha_id)
+            .filter(Reserva.estado.in_([
+                EstadoReserva.PENDIENTE.value,
+                EstadoReserva.CONFIRMADA.value,
+            ]))
+            .count()
+        )
+
+    def actualizar(self, cancha: Cancha) -> Cancha:
+        """
+        actualizar() - pasos 44 a 47 del diagrama.
+        UPDATE cancha SET activa = false
+        """
+        self.db.commit()
+        self.db.refresh(cancha)
         return cancha

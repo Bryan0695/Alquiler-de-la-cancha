@@ -75,5 +75,10 @@ class Cancha(Base):
     """
 
     def desactivar(self) -> None:
-        # TODO: self.activa = False  (baja logica)
-        pass
+        """
+        desactivar() - paso 42 del diagrama.
+        Eliminacion LOGICA: la cancha no se borra de la BD,
+        solo se marca inactiva para preservar el historico
+        de reservas.
+        """
+        self.activa = False

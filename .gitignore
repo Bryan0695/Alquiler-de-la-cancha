@@ -12,3 +12,5 @@ __pycache__/
 
 # Base de datos local
 *.db
+
+*.claude

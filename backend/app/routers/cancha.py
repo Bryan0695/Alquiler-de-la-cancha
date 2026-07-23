@@ -46,3 +46,28 @@ def crear_cancha(datos: CanchaCreate,
         return service.registrar(usuario["id"], datos)   # paso 16
     except ValidacionException as e:
         raise HTTPException(status_code=400, detail=str(e))   # paso 19
+
+@router.delete("/{cancha_id}",
+               response_description="Cancha eliminada",
+               responses={
+                   401: {"description": "Token ausente o invalido"},
+                   403: {"description": "El usuario no tiene rol de administrador"},
+                   404: {"description": "La cancha no existe o no le pertenece"},
+                   409: {"description": "La cancha tiene reservas activas"},
+               })
+def eliminar_cancha(cancha_id: int,
+                    db: Session = Depends(get_db),
+                    usuario=Depends(validar_token_y_rol)):
+    """
+    DELETE /canchas/{id}
+    Elimina logicamente la cancha (activa = false).
+    No se puede eliminar si tiene reservas activas.
+    """
+    service = CanchaService(db)
+    try:
+        service.eliminar(cancha_id, usuario["id"])           # paso 34
+        return {"mensaje": "Cancha eliminada correctamente"}  # paso 49
+    except ValidacionException as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except IntegridadException as e:
+        raise HTTPException(status_code=409, detail=str(e))   # paso 40
