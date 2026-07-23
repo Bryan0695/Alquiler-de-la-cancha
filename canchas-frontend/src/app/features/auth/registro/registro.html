@@ -1,0 +1,50 @@
+<div class="login">
+  <form class="login__card" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <span class="login__etiqueta">UC1 · Registrarse</span>
+    <h1 class="login__titulo">Crea tu cuenta</h1>
+    <p class="login__subtitulo">Reserva canchas en el Parque Samanes</p>
+
+    @if (exito()) {
+      <p-message severity="success" text="Cuenta creada. Redirigiendo al login..." styleClass="login__error" />
+    } @else {
+      <div class="login__campo">
+        <label for="nombre">Nombre completo</label>
+        <input id="nombre" pInputText formControlName="nombre" placeholder="Ej. Ana Pérez" />
+        @if (form.get('nombre')?.invalid && form.get('nombre')?.touched) {
+          <small class="login__campo-error">Ingresa al menos 3 caracteres.</small>
+        }
+      </div>
+
+      <div class="login__campo">
+        <label for="correo">Correo electrónico</label>
+        <input id="correo" type="email" pInputText formControlName="correo" placeholder="ana@correo.com" />
+        @if (form.get('correo')?.invalid && form.get('correo')?.touched) {
+          <small class="login__campo-error">Ingresa un correo válido.</small>
+        }
+      </div>
+
+      <div class="login__campo">
+        <label for="password">Contraseña</label>
+        <p-password inputId="password" formControlName="password" [feedback]="true" [toggleMask]="true" styleClass="login__password" />
+      </div>
+
+      <div class="login__campo">
+        <label for="confirmarPassword">Confirmar contraseña</label>
+        <p-password inputId="confirmarPassword" formControlName="confirmarPassword" [feedback]="false" [toggleMask]="true" styleClass="login__password" />
+        @if (form.errors?.['passwordsDistintos'] && form.get('confirmarPassword')?.touched) {
+          <small class="login__campo-error">Las contraseñas no coinciden.</small>
+        }
+      </div>
+
+      @if (error()) {
+        <p-message severity="error" [text]="error()!" styleClass="login__error" />
+      }
+
+      <p-button type="submit" label="Crear cuenta" styleClass="login__submit" [loading]="cargando()" [fluid]="true" />
+    }
+
+    <span class="login__pie">
+      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+    </span>
+  </form>
+</div>

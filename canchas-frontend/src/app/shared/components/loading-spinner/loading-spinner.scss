@@ -1,0 +1,18 @@
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2.5rem 0;
+
+  &__icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  &__mensaje {
+    color: var(--p-text-muted-color);
+    font-size: 0.9rem;
+  }
+}

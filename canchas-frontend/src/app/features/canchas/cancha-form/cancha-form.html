@@ -1,0 +1,68 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [style]="{ width: '30rem' }"
+  [header]="esEdicion ? 'Editar cancha' : 'Nueva cancha'"
+  (onHide)="cancelado.emit()"
+>
+  <span class="cancha-form__etiqueta">UC7 · {{ esEdicion ? 'Editar cancha' : 'Crear cancha' }}</span>
+
+  <form class="cancha-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="cancha-form__campo">
+      <label for="nombre">Nombre de la cancha</label>
+      <input id="nombre" pInputText formControlName="nombre" placeholder="Ej. Cancha Norte 3" />
+    </div>
+
+    <div class="cancha-form__fila">
+      <div class="cancha-form__campo">
+        <label for="tipo">Tipo</label>
+        <p-select
+          inputId="tipo"
+          formControlName="tipo"
+          [options]="tipos"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+        />
+      </div>
+
+      <div class="cancha-form__campo">
+        <label for="precio">Precio por hora (USD)</label>
+        <p-inputNumber
+          inputId="precio"
+          formControlName="precio_hora"
+          mode="currency"
+          currency="USD"
+          locale="en-US"
+          [min]="0"
+        />
+      </div>
+    </div>
+
+    <div class="cancha-form__fila">
+      <div class="cancha-form__campo">
+        <label for="apertura">Hora de apertura</label>
+        <input id="apertura" pInputText type="time" formControlName="hora_apertura" />
+      </div>
+
+      <div class="cancha-form__campo">
+        <label for="cierre">Hora de cierre</label>
+        <input id="cierre" pInputText type="time" formControlName="hora_cierre" />
+      </div>
+    </div>
+    <p class="cancha-form__ayuda">El sistema genera las franjas horarias automáticamente.</p>
+
+    @if (errorGuardado) {
+      <p-message severity="error" [text]="errorGuardado" styleClass="cancha-form__error" />
+    }
+
+    <div class="cancha-form__acciones">
+      <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="cancelado.emit()" type="button" />
+      <p-button
+        [label]="esEdicion ? 'Guardar cambios' : 'Guardar cancha'"
+        type="submit"
+        [loading]="guardando"
+      />
+    </div>
+  </form>
+</p-dialog>

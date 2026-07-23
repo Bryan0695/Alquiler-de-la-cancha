@@ -1,0 +1,15 @@
+/* Estilos globales de la app */
+@import "primeicons/primeicons.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #f4f6f5;
+  color: #1e2b26;
+}

@@ -1,0 +1,65 @@
+<p-toast />
+
+<div class="stub__header">
+  <span class="stub__etiqueta">UC8 · Mis reservas</span>
+  <h1 class="stub__titulo">Mis reservas</h1>
+</div>
+
+<app-loading-spinner [cargando]="cargando()" mensaje="Cargando tus reservas..." />
+
+@if (error()) {
+  <p-message severity="error" [text]="error()!" />
+}
+
+@if (!cargando() && !error()) {
+  @if (reservas().length === 0) {
+    <p-message severity="info" text="Todavía no tienes ninguna reserva. Ve a 'Buscar canchas' para hacer la primera." />
+  } @else {
+    <p-table [value]="reservas()" [paginator]="reservas().length > 10" [rows]="10">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Cancha</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th>Pago</th>
+          <th>Calificación</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-reserva>
+        <tr>
+          <td>{{ reserva.cancha_nombre }}</td>
+          <td>{{ reserva.monto_total | currency }}</td>
+          <td><p-tag [value]="reserva.estado" [severity]="severidadEstado(reserva.estado)" /></td>
+          <td>
+            @if (reserva.pago) {
+              <p-tag [value]="reserva.pago.estado" [severity]="severidadPago(reserva.pago.estado)" />
+            } @else {
+              <span>—</span>
+            }
+          </td>
+          <td>
+            @if (reserva.calificacion) {
+              <span class="stub__calificado">
+                <i class="pi pi-star-fill"></i> {{ reserva.calificacion.puntaje }}/5
+              </span>
+            } @else if (puedeCalificar(reserva)) {
+              <p-button label="Calificar" icon="pi pi-star" [text]="true" (onClick)="abrirCalificar(reserva)" />
+            } @else {
+              <span>—</span>
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+}
+
+<app-calificar-dialog
+  [visible]="dialogoVisible()"
+  [canchaNombre]="reservaACalificar()?.cancha_nombre ?? ''"
+  [guardando]="guardandoCalificacion()"
+  [error]="errorCalificacion()"
+  (calificar)="onCalificar($event)"
+  (cancelar)="dialogoVisible.set(false)"
+/>

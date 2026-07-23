@@ -1,0 +1,18 @@
+<div class="cancha-card">
+  <div class="cancha-card__header">
+    <h3 class="cancha-card__nombre">{{ cancha().nombre }}</h3>
+    <p-tag [value]="cancha().tipo" severity="info" />
+  </div>
+
+  <div class="cancha-card__rating">
+    <p-rating [ngModel]="cancha().promedio_calificacion" [readonly]="true" [stars]="5" />
+    <span class="cancha-card__rating-valor">{{ cancha().promedio_calificacion | number: '1.1-1' }}</span>
+  </div>
+
+  <div class="cancha-card__detalle">
+    <span><i class="pi pi-clock"></i> {{ cancha().hora_apertura }} - {{ cancha().hora_cierre }}</span>
+    <span class="cancha-card__precio">{{ cancha().precio_hora | currency }} / hora</span>
+  </div>
+
+  <p-button label="Ver disponibilidad" icon="pi pi-calendar-plus" [fluid]="true" (onClick)="reservar.emit(cancha())" />
+</div>
