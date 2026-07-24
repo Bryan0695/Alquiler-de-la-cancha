@@ -35,14 +35,14 @@ implementados del lado del frontend y probados en conjunto con el backend:
 
 | UC | Caso de uso | Estado |
 |----|-------------|--------|
-| UC1 | Registrarse | ✅ Implementado y probado |
-| UC2 | Iniciar sesión | ✅ Implementado y probado |
-| UC3 | Buscar cancha disponible | ✅ Implementado y probado |
-| UC4 | Reservar cancha | ✅ Implementado y probado |
-| UC5 | Pagar reserva (simulado) | ✅ Implementado y probado |
-| UC6 | Calificar cancha | ✅ Implementado (embebido en "Mis reservas") |
-| UC7 | Gestionar canchas (admin) | ✅ Implementado y probado (CRUD completo) |
-| UC8 | Consultar reservas (jugador y admin) | ✅ Implementado y probado |
+| UC1 | Registrarse | Implementado y probado |
+| UC2 | Iniciar sesión | Implementado y probado |
+| UC3 | Buscar cancha disponible | Implementado y probado |
+| UC4 | Reservar cancha | Implementado y probado |
+| UC5 | Pagar reserva (simulado) | Implementado y probado |
+| UC6 | Calificar cancha | Implementado (embebido en "Mis reservas") |
+| UC7 | Gestionar canchas (admin) |  Implementado y probado (CRUD completo) |
+| UC8 | Consultar reservas (jugador y admin) | Implementado y probado |
 
 El pago es **simulado**: no hay integración con ninguna pasarela real, tal
 como especifica RF-005.
