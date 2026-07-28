@@ -12,3 +12,19 @@ class IntegridadException(Exception):
     La operacion viola una regla de integridad.
     """
     pass
+
+
+class RecursoNoEncontradoException(Exception):
+    """
+    El recurso solicitado no existe.
+    Se traduce a HTTP 404.
+    """
+    pass
+
+
+class AccesoDenegadoException(Exception):
+    """
+    El recurso existe, pero el usuario no tiene permiso sobre el.
+    Se traduce a HTTP 403.
+    """
+    pass

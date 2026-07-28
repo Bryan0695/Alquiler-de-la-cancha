@@ -1,7 +1,12 @@
 from app.repositories.cancha_repo import CanchaRepository
 from app.models.cancha import Cancha
 from app.models.horario import Horario
-from app.exceptions import ValidacionException, IntegridadException
+from app.exceptions import (
+    ValidacionException,
+    IntegridadException,
+    RecursoNoEncontradoException,
+    AccesoDenegadoException,
+)
 
 class CanchaService:
 
@@ -66,11 +71,11 @@ class CanchaService:
         cancha = self.repo.buscar_por_id(cancha_id)
 
         if cancha is None:
-            raise ValidacionException("La cancha no existe")
+            raise RecursoNoEncontradoException("La cancha no existe")
 
         # Un admin solo puede eliminar SUS canchas
         if cancha.administrador_id != admin_id:
-            raise ValidacionException("La cancha no le pertenece")
+            raise AccesoDenegadoException("La cancha no le pertenece")
 
         total = self.repo.contar_reservas_activas(cancha_id)   # paso 35
 

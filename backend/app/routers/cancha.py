@@ -9,7 +9,12 @@ from app.schemas.cancha_schema import (
     CanchaListResponse,
     CanchaDetalleResponse,
 )
-from app.exceptions import ValidacionException, IntegridadException
+from app.exceptions import (
+    ValidacionException,
+    IntegridadException,
+    RecursoNoEncontradoException,
+    AccesoDenegadoException,
+)
 
 router = APIRouter(prefix="/canchas", tags=["Canchas"])
 
@@ -51,8 +56,9 @@ def crear_cancha(datos: CanchaCreate,
                response_description="Cancha eliminada",
                responses={
                    401: {"description": "Token ausente o invalido"},
-                   403: {"description": "El usuario no tiene rol de administrador"},
-                   404: {"description": "La cancha no existe o no le pertenece"},
+                   403: {"description": "El usuario no tiene rol de administrador "
+                                        "o la cancha no le pertenece"},
+                   404: {"description": "La cancha no existe"},
                    409: {"description": "La cancha tiene reservas activas"},
                })
 def eliminar_cancha(cancha_id: int,
@@ -62,12 +68,17 @@ def eliminar_cancha(cancha_id: int,
     DELETE /canchas/{id}
     Elimina logicamente la cancha (activa = false).
     No se puede eliminar si tiene reservas activas.
+
+    Devuelve 404 si la cancha no existe y 403 si existe pero
+    pertenece a otro administrador.
     """
     service = CanchaService(db)
     try:
         service.eliminar(cancha_id, usuario["id"])           # paso 34
         return {"mensaje": "Cancha eliminada correctamente"}  # paso 49
-    except ValidacionException as e:
+    except RecursoNoEncontradoException as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except AccesoDenegadoException as e:
+        raise HTTPException(status_code=403, detail=str(e))
     except IntegridadException as e:
         raise HTTPException(status_code=409, detail=str(e))   # paso 40

@@ -7,7 +7,12 @@ import pytest
 
 from app.services.cancha_service import CanchaService
 from app.models.cancha import Cancha
-from app.exceptions import ValidacionException, IntegridadException
+from app.exceptions import (
+    ValidacionException,
+    IntegridadException,
+    RecursoNoEncontradoException,
+    AccesoDenegadoException,
+)
 
 
 def _datos_validos(**overrides):
@@ -118,7 +123,8 @@ def test_eliminar_falla_si_la_cancha_no_existe():
     service = _servicio_con_repo_mock()
     service.repo.buscar_por_id.return_value = None
 
-    with pytest.raises(ValidacionException):
+    # Cancha inexistente: recurso no encontrado, no un problema de permisos.
+    with pytest.raises(RecursoNoEncontradoException):
         service.eliminar(cancha_id=99, admin_id=1)
 
     service.repo.actualizar.assert_not_called()
@@ -132,7 +138,8 @@ def test_eliminar_falla_si_la_cancha_no_le_pertenece():
     )
     service.repo.buscar_por_id.return_value = cancha
 
-    with pytest.raises(ValidacionException):
+    # La cancha SI existe: el problema es de permisos, no de existencia.
+    with pytest.raises(AccesoDenegadoException):
         service.eliminar(cancha_id=5, admin_id=1)  # admin distinto al dueno
 
     service.repo.actualizar.assert_not_called()
