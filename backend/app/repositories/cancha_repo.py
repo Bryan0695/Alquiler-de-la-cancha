@@ -12,10 +12,7 @@ class CanchaRepository:
         return self.db.query(Cancha).filter(Cancha.activa == True).all()
 
     def buscar_por_admin(self, admin_id: int):
-        """
-        buscar_por_admin() - pasos 7 a 9 del diagrama.
-        SELECT cancha WHERE administrador_id = admin_id
-        """
+        """SELECT de las canchas activas de un administrador."""
         return (
             self.db.query(Cancha)
             .filter(Cancha.administrador_id == admin_id)
@@ -23,16 +20,14 @@ class CanchaRepository:
             .all()
         )
     def guardar(self, cancha: Cancha, horarios: list) -> Cancha:
-        """
-        guardar() - pasos 25 a 28 del diagrama.
-        INSERT cancha + horarios en una sola transaccion.
-        """
+        """INSERT de la cancha y sus horarios en una sola transaccion."""
         cancha.horarios = horarios   # el cascade inserta los horarios, SQLAlchemy
         self.db.add(cancha)
-        self.db.commit()             # 
-        self.db.refresh(cancha)      # 
+        self.db.commit()
+        self.db.refresh(cancha)
         return cancha
-    
+
+
     def buscar_por_id(self, cancha_id: int):
         """
         Recupera una cancha por su id. Devuelve None si no existe.
@@ -46,7 +41,6 @@ class CanchaRepository:
 
     def contar_reservas_activas(self, cancha_id: int) -> int:
         """
-        contar_reservas_activas() - pasos 35 a 38 del diagrama.
         SELECT COUNT de reservas PENDIENTE o CONFIRMADA.
         Las COMPLETADA no cuentan: ya ocurrieron.
         """
@@ -61,10 +55,7 @@ class CanchaRepository:
         )
 
     def actualizar(self, cancha: Cancha) -> Cancha:
-        """
-        actualizar() - pasos 44 a 47 del diagrama.
-        UPDATE cancha SET activa = false
-        """
+        """Persiste los cambios pendientes de la cancha en la BD."""
         self.db.commit()
         self.db.refresh(cancha)
         return cancha
