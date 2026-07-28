@@ -43,10 +43,21 @@ El backend es un único proyecto desplegable, organizado internamente en capas c
 
 | Capa | Carpeta | Responsabilidad |
 |------|---------|-----------------|
-| Presentación | `routers/` | Recibe las peticiones HTTP, valida el formato de entrada y devuelve las respuestas JSON. Aquí se validan el token y el rol. |
-| Negocio | `services/` | Contiene las reglas de negocio y orquesta las operaciones. Decide qué es válido y qué no. |
-| Datos | `repositories/` | Único punto que habla con la base de datos. Abstrae las consultas SQL. |
-| Modelos | `models/` | Define la forma de los datos (entidades) que viajan entre las capas. |
+| Presentación | `routers/` | Recibe las peticiones HTTP, aplica el `Depends` de seguridad (token + rol) y traduce las excepciones de negocio a códigos HTTP (`400`, `403`, `404`, `409`). No conoce SQL ni reglas de negocio. |
+| Negocio | `services/` | Orquesta cada caso de uso: valida datos, decide si una operación es válida (ej. no eliminar una cancha con reservas activas) y arma las entidades antes de guardarlas. Lanza excepciones propias (`ValidacionException`, `IntegridadException`) en vez de HTTP. |
+| Datos | `repositories/` | Único punto que habla con la base de datos vía SQLAlchemy. Aquí viven las queries (`filter`, `count`, `commit`). Nada fuera de esta capa arma un `Session.query`. |
+| Modelos | `models/` | Entidades de SQLAlchemy (`Cancha`, `Usuario`, `Reserva`, etc.), sus columnas, `relationship()` entre tablas y métodos de dominio simples (`Cancha.crear()`, `Horario.generar_franjas()`). |
+| DTOs / Esquemas | `schemas/` | Clases Pydantic que definen qué forma debe tener el JSON de entrada (`CanchaCreate`) y de salida (`CanchaListResponse`, `CanchaDetalleResponse`). Desacoplan el modelo de base de datos de lo que el cliente ve. |
+
+### Transversal (cross-cutting)
+
+Estos archivos no son una capa propia, los usan varias capas:
+
+| Archivo | Responsabilidad |
+|---------|-----------------|
+| `security.py` | Lee el header `Authorization: Bearer <token>` (`HTTPBearer`), resuelve el usuario y valida que tenga rol `ADMINISTRADOR`. Hoy usa un diccionario de tokens simulados (`token-admin`, `token-jugador`) mientras no exista login real con JWT firmado. |
+| `exceptions.py` | Excepciones propias del dominio (`ValidacionException`, `IntegridadException`) que la capa de negocio lanza y la capa de presentación traduce a códigos HTTP. |
+| `database.py` | Configura el engine de SQLAlchemy y expone `get_db()`, la dependencia que entrega una sesión de base de datos por petición. |
 
 ### Regla de dependencias
 
@@ -54,6 +65,8 @@ Cada capa solo llama a la capa inmediatamente inferior, nunca al revés y nunca 
 
 ```
 routers → services → repositories → base de datos
+   ↓           ↓
+schemas   exceptions
 ```
 
 Un router jamás accede directamente a la base de datos: siempre pasa por el service y este por el repository. Esta regla mantiene el sistema ordenado, testeable y fácil de mantener.
@@ -85,12 +98,22 @@ Alquiler-de-la-cancha/
 │
 ├── backend/                       API REST en FastAPI
 │   ├── app/
-│   │   ├── main.py                Punto de entrada de la aplicación
-│   │   ├── database.py            Configuración de conexión a la BD
-│   │   ├── routers/               Capa de presentación (endpoints)
+│   │   ├── main.py                Punto de entrada: crea la app FastAPI, registra CORS y routers
+│   │   ├── database.py            Engine de SQLAlchemy + get_db()
+│   │   ├── security.py            Autenticación/autorización (Bearer token + rol)
+│   │   ├── exceptions.py          Excepciones de dominio (Validacion, Integridad)
+│   │   ├── routers/                Capa de presentación (endpoints)
+│   │   │   └── cancha.py          GET/POST/DELETE /canchas
 │   │   ├── services/              Capa de negocio (reglas)
+│   │   │   └── cancha_service.py
 │   │   ├── repositories/          Capa de datos (acceso a BD)
-│   │   └── models/                Entidades del dominio
+│   │   │   └── cancha_repo.py
+│   │   ├── models/                Entidades del dominio (SQLAlchemy)
+│   │   │   └── rol, usuario, cancha, horario, reserva, pago, calificacion
+│   │   └── schemas/               DTOs de entrada/salida (Pydantic)
+│   │       └── cancha_schema.py
+│   ├── scripts/                   SQL de creación y poblado de tablas (pgAdmin)
+│   ├── mocks/                     Casos de prueba manuales por endpoint (peticiones y respuestas esperadas)
 │   ├── requirements.txt           Dependencias de Python
 │   └── .env                       Variables de entorno (NO se sube)
 │
@@ -107,11 +130,14 @@ Alquiler-de-la-cancha/
 ### Backend
 
 - **Python 3.9+**
-- **FastAPI** — framework para construir la API REST
-- **Uvicorn** — servidor que ejecuta la aplicación
-- **SQLAlchemy** — ORM para el acceso a datos
-- **SQLite** — base de datos en entorno local
-- **PostgreSQL** — base de datos en entorno desplegado
+- **FastAPI** — framework para construir la API REST; genera además la documentación interactiva (`/docs`).
+- **Uvicorn** (`[standard]`) — servidor ASGI que ejecuta la aplicación, con `--reload` en desarrollo.
+- **SQLAlchemy** — ORM: define los modelos (`models/`) y ejecuta las queries (`repositories/`).
+- **Pydantic** — valida y serializa los datos de entrada/salida (`schemas/`); es la base de los modelos de FastAPI.
+- **psycopg2-binary** — driver de conexión a PostgreSQL usado por SQLAlchemy en producción.
+- **python-dotenv** — carga las variables del archivo `.env` (ej. `DATABASE_URL`) al iniciar la app.
+- **SQLite** — base de datos por defecto en entorno local (no requiere instalación ni servidor).
+- **PostgreSQL** (Render) — base de datos en el entorno desplegado, persistente.
 
 ### Frontend
 
@@ -120,31 +146,7 @@ Alquiler-de-la-cancha/
 ### Comunicación
 
 - **REST sobre HTTP** con datos en formato JSON
-- **JWT (Bearer token)** para autenticación
-
----
-
-## Requerimientos del sistema
-
-### Requerimientos funcionales
-
-| ID | Nombre | Descripción |
-|----|--------|-------------|
-| RF-001 | Buscar y filtrar canchas | El usuario busca canchas por tipo y precio. |
-| RF-002 | Ver disponibilidad en calendario | Mostrar en un calendario los horarios disponibles en tiempo real. |
-| RF-003 | Realizar reserva y pago | El usuario selecciona cancha y horario, y realiza el pago. |
-| RF-004 | Sistema de reviews y calificaciones | Los usuarios califican canchas, dejan comentarios y consultan reviews. |
-| RF-005 | Notificaciones y recordatorios | Notificar reserva confirmada y enviar recordatorios. |
-
-### Requerimientos no funcionales
-
-| ID | Nombre | Descripción |
-|----|--------|-------------|
-| RNF-001 | Performance móvil | Arranque < 3s, respuesta ágil en la interacción. |
-| RNF-002 | Disponibilidad | Alta disponibilidad; las reservas nunca se pierden; transacciones ACID. |
-| RNF-003 | Seguridad en pagos | No se almacenan datos de tarjeta; el pago se maneja con tokens. |
-| RNF-004 | Compatibilidad | Funciona en las plataformas y navegadores objetivo. |
-| RNF-005 | Escalabilidad | Soporta usuarios concurrentes, con mayor demanda los fines de semana. |
+- **Bearer token** para autenticación (hoy simulado con tokens fijos; JWT real queda pendiente hasta que exista el login)
 
 ---
 
@@ -154,18 +156,27 @@ El archivo `docs/openapi-canchas.yaml` define el contrato de la API: qué endpoi
 
 Para visualizarlo de forma navegable, pega el contenido del archivo en [editor.swagger.io](https://editor.swagger.io).
 
-### Endpoints de gestión de canchas (UC7)
+### Endpoints implementados (UC7 — gestión de canchas)
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/login` | Inicia sesión y devuelve un token JWT. |
-| GET | `/canchas` | Lista las canchas del administrador. |
-| POST | `/canchas` | Crea una nueva cancha. |
-| GET | `/canchas/{id}` | Obtiene una cancha por su id. |
-| PUT | `/canchas/{id}` | Edita una cancha existente. |
-| DELETE | `/canchas/{id}` | Elimina lógicamente una cancha (baja lógica). |
+| Método | Ruta | Descripción | Respuestas |
+|--------|------|-------------|------------|
+| GET | `/canchas` | Lista las canchas activas del administrador autenticado. | `200`, `401`, `403` |
+| POST | `/canchas` | Crea una cancha y genera sus franjas horarias. | `201`, `400`, `401`, `403` |
+| DELETE | `/canchas/{id}` | Baja lógica (`activa = false`). Rechaza si la cancha tiene reservas `PENDIENTE`/`CONFIRMADA`, o si no pertenece al administrador. | `200`, `401`, `403`, `404`, `409` |
 
-Todos los endpoints de canchas requieren el token obtenido en `/login`, enviado en el header `Authorization: Bearer <token>`.
+Pendientes según el contrato OpenAPI: `POST /login` (autenticación real con JWT), `GET /canchas/{id}` y `PUT /canchas/{id}`.
+
+### Autenticación (simulada por ahora)
+
+Como todavía no existe el login, `security.py` valida el header `Authorization: Bearer <token>` contra un diccionario fijo de tokens de prueba:
+
+| Token | Rol | Uso |
+|-------|-----|-----|
+| `token-admin` | ADMINISTRADOR (id 1) | Administrador dueño de las canchas de prueba |
+| `token-admin2` | ADMINISTRADOR (id 3) | Otro administrador, para probar que no puede tocar canchas ajenas |
+| `token-jugador` | JUGADOR (id 2) | Para probar que un jugador recibe `403` en endpoints de canchas |
+
+Se reemplazará por verificación de JWT real cuando exista el endpoint de login. Los casos de prueba manuales para cada token están en `backend/mocks/001-Peticiones`.
 
 Cuando el backend está corriendo, FastAPI genera documentación interactiva automáticamente en `http://localhost:8000/docs`.
 
@@ -288,9 +299,9 @@ git merge main
 
 | Rol | Responsable |
 |-----|-------------|
-| Backend (API REST, base de datos) | *(por completar)* |
-| Frontend (interfaz Angular) | *(por completar)* |
+| Backend (API REST, base de datos) | Jessenia Toapanta |
+| Frontend (interfaz Angular) | Bryan Gallegos |
 
 ---
 
-*Proyecto académico — Diseño de Software.*
+*Proyecto académico UEES — Diseño de Software.*
