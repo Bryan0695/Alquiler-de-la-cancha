@@ -11,6 +11,7 @@ Relaciones:
 from sqlalchemy import Column, Integer, String, Numeric, Time, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.models.enums import EstadoHorario
 
 
 class Cancha(Base):
@@ -59,20 +60,35 @@ class Cancha(Base):
             activa=True,
         )
 
-    """
-     solo se dejan definidos métodos de otros Casos de Uso ---
     def esta_disponible(self, fecha, hora) -> bool:
-        # TODO: revisar horarios libres
-        pass
+        """
+        Indica si la cancha tiene una franja LIBRE que empiece
+        en la fecha y hora pedidas.
+        """
+        return any(
+            horario.fecha == fecha
+            and horario.hora_inicio == hora
+            and horario.estado == EstadoHorario.LIBRE.value
+            for horario in self.horarios
+        )
 
     def calcular_precio(self, horas) -> float:
-        # TODO: precio_hora * horas
-        pass
+        """
+        Costo total de reservar la cancha durante 'horas' horas.
+        """
+        return float(self.precio_hora) * horas
 
     def recalcular_promedio(self) -> None:
-        # TODO: promediar las calificaciones
-        pass
-    """
+        """
+        Recalcula promedio_calificacion como la media de los puntajes
+        recibidos. Sin calificaciones el promedio queda en 0.
+        """
+        if not self.calificaciones:
+            self.promedio_calificacion = 0
+            return
+
+        total = sum(calificacion.puntaje for calificacion in self.calificaciones)
+        self.promedio_calificacion = total / len(self.calificaciones)
 
     def desactivar(self) -> None:
         """
