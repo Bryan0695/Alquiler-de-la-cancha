@@ -28,7 +28,7 @@ class CanchaDetalleResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 class CanchaCreate(BaseModel):
-    """Lo que ENTRA en el POST /canchas (el body JSON del paso 15)."""
+    """Lo que ENTRA en el POST /canchas (el body JSON)."""
     nombre: str = Field(min_length=1, max_length=100)
     tipo: str
     precio_hora: Decimal = Field(gt=0)

@@ -40,7 +40,6 @@ class Horario(Base):
     def generar_franjas(cls, apertura: time, cierre: time,
                         dias: int = DIAS_A_GENERAR) -> list:
         """
-        generar_franjas() - paso 23 del diagrama.
         Crea franjas de 1 hora entre apertura y cierre,
         para los proximos 'dias' dias.
         """

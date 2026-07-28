@@ -45,7 +45,6 @@ class Cancha(Base):
     def crear(cls, nombre, tipo, precio_hora,
               hora_apertura, hora_cierre, administrador_id):
         """
-        crear() - paso 21 del diagrama.
         Construye una cancha nueva con sus valores por defecto.
         cls(...) es lo mismo que Cancha(...)
         """
@@ -92,7 +91,6 @@ class Cancha(Base):
 
     def desactivar(self) -> None:
         """
-        desactivar() - paso 42 del diagrama.
         Eliminacion LOGICA: la cancha no se borra de la BD,
         solo se marca inactiva para preservar el historico
         de reservas.

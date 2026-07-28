@@ -48,9 +48,9 @@ def crear_cancha(datos: CanchaCreate,
     """
     service = CanchaService(db)
     try:
-        return service.registrar(usuario["id"], datos)   # paso 16
+        return service.registrar(usuario["id"], datos)
     except ValidacionException as e:
-        raise HTTPException(status_code=400, detail=str(e))   # paso 19
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.delete("/{cancha_id}",
                response_description="Cancha eliminada",
@@ -74,11 +74,11 @@ def eliminar_cancha(cancha_id: int,
     """
     service = CanchaService(db)
     try:
-        service.eliminar(cancha_id, usuario["id"])           # paso 34
-        return {"mensaje": "Cancha eliminada correctamente"}  # paso 49
+        service.eliminar(cancha_id, usuario["id"])
+        return {"mensaje": "Cancha eliminada correctamente"}
     except RecursoNoEncontradoException as e:
         raise HTTPException(status_code=404, detail=str(e))
     except AccesoDenegadoException as e:
         raise HTTPException(status_code=403, detail=str(e))
     except IntegridadException as e:
-        raise HTTPException(status_code=409, detail=str(e))   # paso 40
+        raise HTTPException(status_code=409, detail=str(e))
