@@ -67,13 +67,13 @@ class Horario(Base):
         return franjas
 
     def bloquear(self) -> None:
-        # TODO: self.estado = EstadoHorario.OCUPADO.value
-        pass
+        """Marca la franja como ocupada (al confirmarse una reserva)."""
+        self.estado = EstadoHorario.OCUPADO.value
 
     def liberar(self) -> None:
-        # TODO: self.estado = EstadoHorario.LIBRE.value
-        pass
+        """Devuelve la franja a estado libre (al cancelarse una reserva)."""
+        self.estado = EstadoHorario.LIBRE.value
 
     def esta_libre(self) -> bool:
-        # TODO: return self.estado == EstadoHorario.LIBRE.value
-        pass
+        """Indica si la franja sigue disponible para reservar."""
+        return self.estado == EstadoHorario.LIBRE.value

@@ -50,3 +50,34 @@ def test_las_franjas_usan_la_fecha_de_hoy():
     fechas = {f.fecha for f in franjas}
     assert hoy in fechas
     assert (hoy + timedelta(days=1)) in fechas
+
+
+def test_bloquear_marca_la_franja_ocupada():
+    franja = Horario(fecha=date.today(), hora_inicio=time(8, 0),
+                     hora_fin=time(9, 0), estado=EstadoHorario.LIBRE.value)
+
+    franja.bloquear()
+
+    assert franja.estado == EstadoHorario.OCUPADO.value
+
+
+def test_liberar_devuelve_la_franja_a_libre():
+    franja = Horario(fecha=date.today(), hora_inicio=time(8, 0),
+                     hora_fin=time(9, 0), estado=EstadoHorario.OCUPADO.value)
+
+    franja.liberar()
+
+    assert franja.estado == EstadoHorario.LIBRE.value
+
+
+def test_esta_libre_refleja_el_estado_actual():
+    franja = Horario(fecha=date.today(), hora_inicio=time(8, 0),
+                     hora_fin=time(9, 0), estado=EstadoHorario.LIBRE.value)
+
+    assert franja.esta_libre() is True
+
+    franja.bloquear()
+    assert franja.esta_libre() is False
+
+    franja.liberar()
+    assert franja.esta_libre() is True
