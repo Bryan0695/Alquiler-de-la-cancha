@@ -1,0 +1,51 @@
+.cancha-card {
+  background: #ffffff;
+  border: 1px solid #e3e9e6;
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__nombre {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #12352b;
+  }
+
+  &__rating {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &-valor {
+      font-size: 0.8rem;
+      color: #6b7a74;
+    }
+  }
+
+  &__detalle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: #556a63;
+
+    i {
+      margin-right: 0.3rem;
+    }
+  }
+
+  &__precio {
+    font-weight: 700;
+    color: #1f4f3f;
+  }
+}

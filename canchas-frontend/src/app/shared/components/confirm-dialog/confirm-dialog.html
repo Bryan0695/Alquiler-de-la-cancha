@@ -1,0 +1,27 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '28rem' }"
+  [header]="titulo()"
+>
+  <p class="confirm-dialog__mensaje">{{ mensaje() }}</p>
+
+  @if (detalle()) {
+    <div class="confirm-dialog__detalle">{{ detalle() }}</div>
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button
+      [label]="textoCancelar()"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="cancelar.emit()"
+    />
+    <p-button
+      [label]="textoConfirmar()"
+      [severity]="severidad()"
+      (onClick)="confirmar.emit()"
+    />
+  </ng-template>
+</p-dialog>

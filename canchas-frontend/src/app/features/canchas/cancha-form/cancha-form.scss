@@ -1,0 +1,58 @@
+.cancha-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  margin-top: 0.75rem;
+
+  &__etiqueta {
+    display: inline-block;
+    background: #eaf3ee;
+    color: #1f4f3f;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    margin-bottom: 0.25rem;
+  }
+
+  &__fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.95rem;
+  }
+
+  &__campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2c3b36;
+    }
+
+    input,
+    p-select,
+    p-inputnumber {
+      width: 100%;
+    }
+  }
+
+  &__ayuda {
+    margin: -0.4rem 0 0;
+    font-size: 0.75rem;
+    color: #8a9791;
+  }
+
+  &__error {
+    width: 100%;
+  }
+
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+}

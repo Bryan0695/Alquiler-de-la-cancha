@@ -1,0 +1,56 @@
+<div class="admin__header">
+  <span class="admin__etiqueta">UC8 · Consultar reservas</span>
+  <h1 class="admin__titulo">Reservas de mis canchas</h1>
+</div>
+
+<div class="admin__filtros">
+  <div class="admin__filtro">
+    <label>Desde</label>
+    <p-datepicker [ngModel]="desde()" (ngModelChange)="desde.set($event)" dateFormat="dd/mm/yy" />
+  </div>
+  <div class="admin__filtro">
+    <label>Hasta</label>
+    <p-datepicker [ngModel]="hasta()" (ngModelChange)="hasta.set($event)" dateFormat="dd/mm/yy" />
+  </div>
+  <p-button label="Filtrar" icon="pi pi-filter" (onClick)="buscar()" />
+</div>
+
+<app-loading-spinner [cargando]="cargando()" mensaje="Consultando reservas..." />
+
+@if (error()) {
+  <p-message severity="warn" [text]="error()!" />
+}
+
+@if (!cargando() && !error()) {
+  <p-table [value]="reservas()" [paginator]="reservas().length > 10" [rows]="10">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Cancha</th>
+        <th>Jugador</th>
+        <th>Fecha</th>
+        <th>Horario</th>
+        <th>Monto</th>
+        <th>Estado</th>
+        <th>Pago</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-reserva>
+      <tr>
+        <td>{{ reserva.cancha_nombre }}</td>
+        <td>{{ reserva.usuario_nombre }}</td>
+        <td>{{ reserva.fecha }}</td>
+        <td>{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
+        <td>{{ reserva.monto_total | currency }}</td>
+        <td><p-tag [value]="reserva.estado" /></td>
+        <td><p-tag [value]="reserva.estado_pago" [severity]="severidadPago(reserva.estado_pago)" /></td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="admin__vacio">No hay reservas en ese rango de fechas.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+}

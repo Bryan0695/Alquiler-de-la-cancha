@@ -1,0 +1,71 @@
+<p-toast />
+
+<div class="canchas-list__header">
+  <div>
+    <span class="canchas-list__etiqueta">UC7 · Gestionar canchas</span>
+    <h1 class="canchas-list__titulo">Mis canchas</h1>
+    <p class="canchas-list__subtitulo">{{ canchas().length }} cancha(s) registrada(s)</p>
+  </div>
+  <p-button label="Nueva cancha" icon="pi pi-plus" (onClick)="abrirCrear()" />
+</div>
+
+<app-loading-spinner [cargando]="cargando()" mensaje="Cargando canchas..." />
+
+@if (!cargando()) {
+  <p-table [value]="canchas()" [paginator]="canchas().length > 10" [rows]="10" styleClass="canchas-list__tabla">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Precio/hora</th>
+        <th>Horario</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-cancha>
+      <tr>
+        <td>{{ cancha.nombre }}</td>
+        <td>{{ cancha.tipo }}</td>
+        <td>{{ cancha.precio_hora | currency }}</td>
+        <td>{{ cancha.hora_apertura }} - {{ cancha.hora_cierre }}</td>
+        <td>
+          <p-tag [value]="cancha.activa ? 'Activa' : 'Inactiva'" [severity]="cancha.activa ? 'success' : 'danger'" />
+        </td>
+        <td class="canchas-list__acciones">
+          <p-button icon="pi pi-pencil" [text]="true" (onClick)="abrirEditar(cancha)" pTooltip="Editar" />
+          <p-button
+            icon="pi pi-trash"
+            [text]="true"
+            severity="danger"
+            (onClick)="pedirConfirmacionEliminar(cancha)"
+            pTooltip="Eliminar"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="canchas-list__vacio">Todavía no has registrado ninguna cancha.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+}
+
+<app-cancha-form
+  [visible]="formularioVisible()"
+  [cancha]="canchaEnEdicion()"
+  (guardado)="onGuardado()"
+  (cancelado)="formularioVisible.set(false)"
+/>
+
+<app-confirm-dialog
+  [visible]="confirmacionVisible()"
+  [titulo]="'Eliminar ' + (canchaAEliminar()?.nombre ?? 'cancha')"
+  mensaje="Esta acción desactivará la cancha y dejará de mostrarse en las búsquedas de los jugadores."
+  detalle="El histórico de reservas anteriores se conservará."
+  (confirmar)="confirmarEliminar()"
+  (cancelar)="confirmacionVisible.set(false)"
+/>

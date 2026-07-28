@@ -1,0 +1,15 @@
+.confirm-dialog {
+  &__mensaje {
+    margin: 0 0 0.75rem;
+    color: var(--p-text-color);
+  }
+
+  &__detalle {
+    background: var(--p-red-50, #fef2f2);
+    border: 1px solid var(--p-red-200, #fecaca);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.875rem;
+    color: var(--p-red-700, #b91c1c);
+  }
+}

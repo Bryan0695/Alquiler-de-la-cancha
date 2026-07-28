@@ -1,0 +1,91 @@
+.login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #12352b 0%, #1f4f3f 100%);
+  padding: 1.5rem;
+
+  &__card {
+    width: 100%;
+    max-width: 380px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 2rem 2.25rem 1.75rem;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__etiqueta {
+    align-self: flex-start;
+    background: #eaf3ee;
+    color: #1f4f3f;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    margin-bottom: 0.9rem;
+  }
+
+  &__titulo {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #12352b;
+  }
+
+  &__subtitulo {
+    margin: 0.15rem 0 1.5rem;
+    font-size: 0.85rem;
+    color: #6b7a74;
+  }
+
+  &__campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2c3b36;
+    }
+
+    input {
+      width: 100%;
+    }
+  }
+
+  &__password {
+    width: 100%;
+
+    ::ng-deep input {
+      width: 100%;
+    }
+  }
+
+  &__error {
+    margin-bottom: 1rem;
+    width: 100%;
+  }
+
+  &__submit {
+    margin-top: 0.25rem;
+  }
+
+  &__pie {
+    text-align: center;
+    margin-top: 1.25rem;
+    font-size: 0.75rem;
+    color: #9aa8a2;
+
+    a {
+      color: #1f4f3f;
+      font-weight: 600;
+      text-decoration: none;
+    }
+  }
+}

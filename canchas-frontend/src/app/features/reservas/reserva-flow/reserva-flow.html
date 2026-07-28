@@ -1,0 +1,88 @@
+<app-loading-spinner [cargando]="cargandoCancha()" mensaje="Cargando cancha..." />
+
+@if (!cargandoCancha() && cancha()) {
+  <div class="flow__header">
+    <span class="flow__etiqueta">UC4 · Reservar cancha</span>
+    <h1 class="flow__titulo">{{ cancha()!.nombre }}</h1>
+    <p class="flow__subtitulo">{{ cancha()!.tipo }} · {{ cancha()!.precio_hora | currency }} / hora</p>
+  </div>
+
+  <div class="flow__pasos">
+    <span class="flow__paso" [class.flow__paso--activo]="paso() === 'horario'">1. Elegir horario</span>
+    <span class="flow__paso" [class.flow__paso--activo]="paso() === 'confirmar'">2. Confirmar y pagar</span>
+    <span class="flow__paso" [class.flow__paso--activo]="paso() === 'listo'">3. Confirmación</span>
+  </div>
+
+  @if (paso() === 'horario') {
+    <div class="flow__seccion">
+      <label class="flow__label">Fecha</label>
+      <p-datepicker
+        [ngModel]="fecha()"
+        (ngModelChange)="onFechaCambiada($event)"
+        [minDate]="fecha()"
+        dateFormat="dd/mm/yy"
+        [showIcon]="true"
+      />
+
+      <app-loading-spinner [cargando]="cargandoHorarios()" mensaje="Consultando horarios..." />
+
+      @if (errorHorarios()) {
+        <p-message severity="warn" [text]="errorHorarios()!" />
+      }
+
+      @if (!cargandoHorarios() && !errorHorarios()) {
+        @if (horarios().length === 0) {
+          <p-message severity="info" text="No hay horarios cargados para esta fecha. Prueba con otro día." />
+        } @else {
+          <div class="flow__horarios">
+            @for (horario of horarios(); track horario.id) {
+              <button
+                type="button"
+                class="flow__horario"
+                [class.flow__horario--ocupado]="horario.estado === 'OCUPADO'"
+                [disabled]="horario.estado === 'OCUPADO'"
+                (click)="seleccionarHorario(horario)"
+              >
+                {{ horario.hora_inicio }} - {{ horario.hora_fin }}
+              </button>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+
+  @if (paso() === 'confirmar' && horarioSeleccionado()) {
+    <div class="flow__seccion flow__resumen">
+      <h2>Resumen de la reserva</h2>
+      <dl>
+        <dt>Cancha</dt>
+        <dd>{{ cancha()!.nombre }}</dd>
+        <dt>Fecha</dt>
+        <dd>{{ horarioSeleccionado()!.fecha }}</dd>
+        <dt>Horario</dt>
+        <dd>{{ horarioSeleccionado()!.hora_inicio }} - {{ horarioSeleccionado()!.hora_fin }}</dd>
+        <dt>Total (pago simulado)</dt>
+        <dd class="flow__total">{{ totalEstimado() | currency }}</dd>
+      </dl>
+
+      @if (errorConfirmar()) {
+        <p-message severity="error" [text]="errorConfirmar()!" />
+      }
+
+      <div class="flow__acciones">
+        <p-button label="Elegir otro horario" severity="secondary" [outlined]="true" (onClick)="volverAHorarios()" />
+        <p-button label="Confirmar y pagar" icon="pi pi-lock" [loading]="confirmando()" (onClick)="confirmarYPagar()" />
+      </div>
+    </div>
+  }
+
+  @if (paso() === 'listo') {
+    <div class="flow__seccion flow__exito">
+      <i class="pi pi-check-circle flow__exito-icono"></i>
+      <h2>¡Reserva confirmada!</h2>
+      <p>Tu pago simulado fue registrado y la cancha quedó reservada.</p>
+      <p-button label="Volver a buscar canchas" (onClick)="volverABuscar()" />
+    </div>
+  }
+}

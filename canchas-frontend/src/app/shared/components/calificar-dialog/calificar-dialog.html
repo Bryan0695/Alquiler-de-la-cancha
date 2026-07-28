@@ -1,0 +1,41 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [style]="{ width: '26rem' }"
+  header="Calificar cancha"
+  (onHide)="cancelar.emit()"
+>
+  <span class="calificar__etiqueta">UC6 · Calificar cancha</span>
+  <p class="calificar__cancha">{{ canchaNombre() }}</p>
+
+  <div class="calificar__campo">
+    <label>Puntaje</label>
+    <p-rating [ngModel]="puntaje()" (ngModelChange)="puntaje.set($event)" [stars]="5" />
+  </div>
+
+  <div class="calificar__campo">
+    <label for="comentario">Comentario (opcional)</label>
+    <textarea
+      pTextarea
+      id="comentario"
+      rows="3"
+      [ngModel]="comentario()"
+      (ngModelChange)="comentario.set($event)"
+      placeholder="¿Cómo estuvo tu experiencia?"
+    ></textarea>
+  </div>
+
+  @if (error()) {
+    <small class="calificar__error">{{ error() }}</small>
+  }
+
+  <div class="calificar__acciones">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="cancelar.emit()" />
+    <p-button
+      label="Enviar calificación"
+      [disabled]="puntaje() < 1"
+      [loading]="guardando()"
+      (onClick)="onConfirmar()"
+    />
+  </div>
+</p-dialog>

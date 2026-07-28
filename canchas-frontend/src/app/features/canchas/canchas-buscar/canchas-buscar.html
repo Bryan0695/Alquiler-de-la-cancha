@@ -1,0 +1,52 @@
+<div class="buscar__header">
+  <span class="buscar__etiqueta">UC3 · Buscar cancha disponible</span>
+  <h1 class="buscar__titulo">Canchas en Parque Samanes</h1>
+</div>
+
+<div class="buscar__filtros">
+  <div class="buscar__filtro">
+    <label>Tipo de cancha</label>
+    <p-select
+      [ngModel]="tipoSeleccionado()"
+      (ngModelChange)="tipoSeleccionado.set($event)"
+      [options]="tipos"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Todos"
+      [showClear]="true"
+    />
+  </div>
+
+  <div class="buscar__filtro">
+    <label>Precio máximo por hora</label>
+    <p-inputNumber
+      [ngModel]="precioMaximo()"
+      (ngModelChange)="precioMaximo.set($event)"
+      mode="currency"
+      currency="USD"
+      locale="en-US"
+      placeholder="Sin límite"
+    />
+  </div>
+
+  <p-button label="Buscar" icon="pi pi-search" (onClick)="aplicarFiltros()" />
+  <p-button label="Limpiar filtros" [text]="true" (onClick)="limpiarFiltros()" />
+</div>
+
+<app-loading-spinner [cargando]="cargando()" mensaje="Buscando canchas..." />
+
+@if (error()) {
+  <p-message severity="error" [text]="error()!" />
+}
+
+@if (!cargando() && !error()) {
+  @if (canchasFiltradas().length === 0) {
+    <p-message severity="info" text="No se encontraron canchas con esos filtros." />
+  } @else {
+    <div class="buscar__grid">
+      @for (cancha of canchasFiltradas(); track cancha.id) {
+        <app-cancha-card [cancha]="cancha" (reservar)="irAReservar($event)" />
+      }
+    </div>
+  }
+}

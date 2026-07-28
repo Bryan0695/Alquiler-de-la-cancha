@@ -1,0 +1,39 @@
+<div class="layout">
+  <aside class="layout__sidebar">
+    <div class="layout__marca">
+      <i class="pi pi-shield"></i>
+      <span>Canchas Samanes</span>
+    </div>
+
+    <nav class="layout__nav">
+      @for (item of menuVisible(); track item.ruta) {
+        <a
+          class="layout__nav-item"
+          [routerLink]="item.ruta"
+          routerLinkActive="layout__nav-item--activo"
+        >
+          <i [class]="item.icono"></i>
+          <span>{{ item.etiqueta }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="layout__usuario">
+      <div class="layout__usuario-info">
+        <span class="layout__usuario-nombre">{{ usuario()?.nombre }}</span>
+        <span class="layout__usuario-rol">{{ usuario()?.rol }}</span>
+      </div>
+      <p-button
+        icon="pi pi-sign-out"
+        severity="secondary"
+        [text]="true"
+        (onClick)="cerrarSesion()"
+        pTooltip="Cerrar sesión"
+      />
+    </div>
+  </aside>
+
+  <main class="layout__contenido">
+    <router-outlet />
+  </main>
+</div>

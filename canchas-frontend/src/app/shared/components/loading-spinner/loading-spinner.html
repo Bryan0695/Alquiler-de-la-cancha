@@ -1,0 +1,6 @@
+@if (cargando()) {
+  <div class="loading-spinner">
+    <p-progress-spinner styleClass="loading-spinner__icon" strokeWidth="4" />
+    <span class="loading-spinner__mensaje">{{ mensaje() }}</span>
+  </div>
+}
