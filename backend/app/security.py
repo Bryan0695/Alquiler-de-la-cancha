@@ -4,6 +4,13 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 # auto_error=False para poder devolver 401 (por defecto daria 403)
 security = HTTPBearer(auto_error=False)
 
+# TODO: reemplazar por jwt.decode() cuando exista el login
+TOKENS_SIMULADOS = {
+    "token-admin":   {"id": 1, "rol": "ADMINISTRADOR"},
+    "token-admin2":  {"id": 3, "rol": "ADMINISTRADOR"},
+    "token-jugador": {"id": 2, "rol": "JUGADOR"},
+}
+
 
 def obtener_usuario_actual(
     credenciales: HTTPAuthorizationCredentials = Depends(security)
@@ -18,14 +25,7 @@ def obtener_usuario_actual(
 
     token = credenciales.credentials   # ya viene sin el "Bearer "
 
-    # TODO: reemplazar por jwt.decode() cuando exista el login
-    tokens_falsos = {
-        "token-admin":   {"id": 1, "rol": "ADMINISTRADOR"},
-        "token-admin2":  {"id": 3, "rol": "ADMINISTRADOR"},
-        "token-jugador": {"id": 2, "rol": "JUGADOR"},
-    }
-
-    usuario = tokens_falsos.get(token)
+    usuario = TOKENS_SIMULADOS.get(token)
     if usuario is None:
         raise HTTPException(status_code=401, detail="Token ausente o invalido")
 
