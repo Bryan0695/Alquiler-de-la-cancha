@@ -3,12 +3,28 @@ from types import SimpleNamespace
 import pytest
 from fastapi import HTTPException
 
-from app.security import obtener_usuario_actual, validar_token_y_rol
+from app.security import (
+    AutenticacionSimulada,
+    obtener_usuario_actual,
+    validar_token_y_rol,
+)
 
 
 def _credenciales(token):
     """Imita el objeto HTTPAuthorizationCredentials de FastAPI."""
     return SimpleNamespace(scheme="Bearer", credentials=token)
+
+
+# ---------------------- AutenticacionSimulada ------------------------
+
+def test_validar_token_devuelve_el_usuario_si_el_token_existe():
+    auth = AutenticacionSimulada()
+    assert auth.validar_token("token-admin") == {"id": 1, "rol": "ADMINISTRADOR"}
+
+
+def test_validar_token_devuelve_none_si_el_token_no_existe():
+    auth = AutenticacionSimulada()
+    assert auth.validar_token("token-falso") is None
 
 
 # ----------------------- obtener_usuario_actual ----------------------

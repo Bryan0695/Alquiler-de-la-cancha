@@ -12,6 +12,27 @@ TOKENS_SIMULADOS = {
 }
 
 
+class AutenticacionSimulada:
+    """
+    Encapsula el mecanismo de autenticacion.
+
+    Hoy resuelve el token contra un diccionario en memoria. Cuando exista
+    el login real, basta con cambiar validar_token() por jwt.decode():
+    quien la usa no se entera del cambio.
+    """
+
+    def __init__(self, tokens=TOKENS_SIMULADOS):
+        self._tokens = tokens
+
+    def validar_token(self, token) -> dict | None:
+        """Devuelve los datos del usuario, o None si el token no es valido."""
+        return self._tokens.get(token)
+
+
+# instancia unica que usan las dependencias de FastAPI
+autenticacion = AutenticacionSimulada()
+
+
 def obtener_usuario_actual(
     credenciales: HTTPAuthorizationCredentials = Depends(security)
 ):
@@ -25,7 +46,7 @@ def obtener_usuario_actual(
 
     token = credenciales.credentials   # ya viene sin el "Bearer "
 
-    usuario = TOKENS_SIMULADOS.get(token)
+    usuario = autenticacion.validar_token(token)
     if usuario is None:
         raise HTTPException(status_code=401, detail="Token ausente o invalido")
 
