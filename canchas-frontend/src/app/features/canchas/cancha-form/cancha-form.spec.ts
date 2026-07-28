@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { Cancha } from '../../../core/models/cancha.model';
 import { CanchaService } from '../../../core/services/cancha.service';
-import { CanchaForm } from './cancha-form';
+import { CANCHA_DEFAULT, CanchaForm } from './cancha-form';
 
 const CANCHA: Cancha = {
   id: 7,
@@ -15,13 +15,9 @@ const CANCHA: Cancha = {
   activa: true,
 };
 
-const VALORES_POR_DEFECTO = {
-  nombre: '',
-  tipo: 'futbol5',
-  precio_hora: 20,
-  hora_apertura: '08:00',
-  hora_cierre: '22:00',
-};
+// Se compara contra la constante real del componente, no contra una copia:
+// si cambian los valores por defecto, estos tests siguen siendo validos.
+const VALORES_POR_DEFECTO = { ...CANCHA_DEFAULT };
 
 describe('CanchaForm', () => {
   let fixture: ComponentFixture<CanchaForm>;
@@ -116,6 +112,26 @@ describe('CanchaForm', () => {
       fixture.detectChanges();
 
       expect(componente.form.getRawValue()).toEqual(VALORES_POR_DEFECTO);
+    });
+
+    it('deja el formulario con los valores de CANCHA_DEFAULT en modo creación', () => {
+      componente.form.setValue({
+        nombre: 'Cancha Sur',
+        tipo: 'futbol11',
+        precio_hora: 50,
+        hora_apertura: '07:00',
+        hora_cierre: '23:00',
+      });
+
+      fixture.componentRef.setInput('visible', true);
+      fixture.detectChanges();
+
+      const valores = componente.form.getRawValue();
+      expect(valores.nombre).toBe(CANCHA_DEFAULT.nombre);
+      expect(valores.tipo).toBe(CANCHA_DEFAULT.tipo);
+      expect(valores.precio_hora).toBe(CANCHA_DEFAULT.precio_hora);
+      expect(valores.hora_apertura).toBe(CANCHA_DEFAULT.hora_apertura);
+      expect(valores.hora_cierre).toBe(CANCHA_DEFAULT.hora_cierre);
     });
 
     it('limpia el error de guardado anterior al reabrirse', () => {

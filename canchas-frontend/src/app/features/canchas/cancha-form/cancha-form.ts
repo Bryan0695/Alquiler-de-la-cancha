@@ -1,3 +1,4 @@
+
 import { Component, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -8,6 +9,26 @@ import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { CanchaService } from '../../../core/services/cancha.service';
 import { Cancha, TIPOS_CANCHA } from '../../../core/models/cancha.model';
+
+/**
+ * Valores con los que nace una cancha nueva en el formulario.
+ * Se tipa con Readonly<> en vez de `as const` para que los controles del
+ * FormGroup queden como string/number y no como literales ('08:00', 20...),
+ * que impedirian asignarles cualquier otro valor.
+ */
+export const CANCHA_DEFAULT: Readonly<{
+  nombre: string;
+  tipo: string;
+  precio_hora: number;
+  hora_apertura: string;
+  hora_cierre: string;
+}> = {
+  nombre: '',
+  tipo: 'futbol5',
+  precio_hora: 20,
+  hora_apertura: '08:00',
+  hora_cierre: '22:00',
+};
 
 @Component({
   selector: 'app-cancha-form',
@@ -41,11 +62,11 @@ export class CanchaForm {
   private dialogYaAbierto = false;
 
   readonly form = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-    tipo: ['futbol5', [Validators.required]],
-    precio_hora: [20, [Validators.required, Validators.min(0.01)]],
-    hora_apertura: ['08:00', [Validators.required]],
-    hora_cierre: ['22:00', [Validators.required]],
+    nombre: [CANCHA_DEFAULT.nombre, [Validators.required, Validators.minLength(3)]],
+    tipo: [CANCHA_DEFAULT.tipo, [Validators.required]],
+    precio_hora: [CANCHA_DEFAULT.precio_hora, [Validators.required, Validators.min(0.01)]],
+    hora_apertura: [CANCHA_DEFAULT.hora_apertura, [Validators.required]],
+    hora_cierre: [CANCHA_DEFAULT.hora_cierre, [Validators.required]],
   });
 
   constructor() {
@@ -63,13 +84,7 @@ export class CanchaForm {
             hora_cierre: actual.hora_cierre,
           });
         } else {
-          this.form.reset({
-            nombre: '',
-            tipo: 'futbol5',
-            precio_hora: 20,
-            hora_apertura: '08:00',
-            hora_cierre: '22:00',
-          });
+          this.form.reset({ ...CANCHA_DEFAULT });
         }
         this.errorGuardado = null;
       }
